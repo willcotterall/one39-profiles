@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ONE39 &mdash; Profile Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   ONE39 PROFILE GENERATOR — EDITORIAL LUXURY
+   ═══════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --midnight: #0E0807;
+  --surface: #141110;
+  --surface-raised: #1A1716;
+  --surface-hover: #211E1C;
+  --gold: #C6AC74;
+  --gold-dim: rgba(198, 172, 116, 0.15);
+  --gold-border: rgba(198, 172, 116, 0.25);
+  --gold-glow: rgba(198, 172, 116, 0.08);
+  --white: #F5F0EB;
+  --white-60: rgba(245, 240, 235, 0.6);
+  --white-40: rgba(245, 240, 235, 0.4);
+  --white-20: rgba(245, 240, 235, 0.2);
+  --white-08: rgba(245, 240, 235, 0.08);
+  --white-04: rgba(245, 240, 235, 0.04);
+  --error: #D4634B;
+  --success: #6BAF7B;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Inter', -apple-system, sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html { height: 100%; }
+
+body {
+  background: var(--midnight);
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* ── Background Texture ──────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(198, 172, 116, 0.03), transparent),
+    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(198, 172, 116, 0.02), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Grain Overlay ───────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Typography ──────────────────────── */
+.t-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.t-heading {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--white);
+}
+
+.t-body {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--white-60);
+  line-height: 1.7;
+}
+
+.t-caption {
+  font-size: 11px;
+  color: var(--white-40);
+  letter-spacing: 0.2px;
+}
+
+/* ── Layout ──────────────────────────── */
+.app { position: relative; z-index: 1; }
+
+.screen {
+  display: none;
+  animation: screenIn 0.6s var(--ease) forwards;
+}
+.screen.active { display: block; }
+
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Logo ────────────────────────────── */
+.brand {
+  text-align: center;
+  padding: 48px 0 0;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  user-select: none;
+}
+
+.brand-one { font-family: var(--serif); font-weight: 300; font-size: 22px; color: var(--white); letter-spacing: 0.5px; }
+.brand-39 { font-family: var(--sans); font-weight: 600; font-size: 18px; color: var(--gold); letter-spacing: -0.5px; margin-left: 1px; }
+
+.brand-sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--white-20);
+}
+
+/* ═══════════════════════════════════════
+   STATE 1: UPLOAD FORM
+   ═══════════════════════════════════════ */
+
+.upload-screen {
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.form-header .t-label { margin-bottom: 16px; }
+.form-header .t-heading { margin-bottom: 12px; }
+
+/* ── Drop Zone ───────────────────────── */
+.drop-zone {
+  position: relative;
+  border: 1px dashed var(--gold-border);
+  border-radius: 12px;
+  padding: 48px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s var(--ease);
+  background: var(--white-04);
+  margin-bottom: 32px;
+}
+
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--gold);
+  background: var(--gold-glow);
+}
+
+.drop-zone.drag-over {
+  transform: scale(1.005);
+  box-shadow: 0 0 40px var(--gold-glow);
+}
+
+.drop-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 16px;
+  border: 1.5px solid var(--gold-border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  transition: all 0.4s var(--ease);
+}
+
+.drop-zone:hover .drop-icon {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+
+.drop-icon svg { width: 18px; height: 18px; }
+
+.drop-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.drop-sub {
+  font-size: 12px;
+  color: var(--white-40);
+}
+
+.drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ── File List ───────────────────────── */
+.file-list {
+  list-style: none;
+  margin-bottom: 32px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  margin-bottom: 6px;
+  animation: fileIn 0.35s var(--ease-out) forwards;
+  opacity: 0;
+}
+
+@keyframes fileIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.file-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+
+.file-icon.pdf { background: rgba(212, 99, 75, 0.15); color: #D4634B; }
+.file-icon.doc { background: rgba(75, 140, 212, 0.15); color: #4B8CD4; }
+.file-icon.img { background: rgba(107, 175, 123, 0.15); color: #6BAF7B; }
+.file-icon.txt { background: var(--white-08); color: var(--white-40); }
+
+.file-name {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--white-60);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-size {
+  font-size: 11px;
+  color: var(--white-20);
+  flex-shrink: 0;
+}
+
+.file-remove {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--white-20);
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.file-remove:hover { color: var(--error); background: rgba(212, 99, 75, 0.1); }
+
+/* ── Form Fields ─────────────────────── */
+.form-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+
+.field label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--white-40);
+}
+
+.field input {
+  background: var(--surface);
+  border: 1px solid var(--white-08);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--white);
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.field input:focus { border-color: var(--gold-border); }
+.field input::placeholder { color: var(--white-20); }
+
+.access-row {
+  display: flex;
+  gap: 8px;
+}
+
+.access-row input { flex: 1; }
+
+.btn-random {
+  background: var(--surface);
+  border: 1px solid var(--white-08);
+  border-radius: 8px;
+  padding: 0 14px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+
+.btn-random:hover { border-color: var(--gold-border); background: var(--gold-glow); }
+
+/* ── Buttons ─────────────────────────── */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, var(--gold), #B89D5E);
+  border: none;
+  border-radius: 10px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--midnight);
+  cursor: pointer;
+  transition: all 0.4s var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.btn-primary:hover::before { transform: translateX(100%); }
+.btn-primary:hover { box-shadow: 0 4px 24px rgba(198, 172, 116, 0.25); transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-primary:disabled::before { display: none; }
+
+.file-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: rgba(14, 8, 7, 0.2);
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════
+   STATE 2: PROCESSING
+   ═══════════════════════════════════════ */
+
+.processing-screen {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.processing-screen.active { display: flex; }
+
+/* ── Orbital Loader ──────────────────── */
+.loader-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 48px;
+}
+
+.orbit {
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+}
+
+.orbit-1 {
+  border-top-color: var(--gold);
+  animation: spin 3s linear infinite;
+}
+
+.orbit-2 {
+  inset: 12px;
+  border-right-color: rgba(198, 172, 116, 0.4);
+  animation: spin 5s linear infinite reverse;
+}
+
+.orbit-3 {
+  inset: 24px;
+  border-bottom-color: rgba(198, 172, 116, 0.2);
+  animation: spin 7s linear infinite;
+}
+
+.orbit-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  top: -3px;
+  left: 50%;
+  margin-left: -3px;
+  box-shadow: 0 0 12px var(--gold);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-center {
+  position: absolute;
+  inset: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold-glow), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-pulse {
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.8); opacity: 1; }
+}
+
+/* ── Progress Steps ──────────────────── */
+.progress-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 24px;
+  color: var(--white);
+  margin-bottom: 32px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  max-width: 320px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--white-20);
+  transition: color 0.5s;
+}
+
+.step.active { color: var(--white); }
+.step.done { color: var(--gold); }
+
+.step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--white-20);
+  flex-shrink: 0;
+  transition: all 0.5s;
+}
+
+.step.active .step-dot {
+  background: var(--white);
+  box-shadow: 0 0 8px rgba(245, 240, 235, 0.4);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.step.done .step-dot { background: var(--gold); box-shadow: 0 0 8px var(--gold-glow); }
+
+/* ═══════════════════════════════════════
+   STATE 3: REVIEW & REVISE
+   ═══════════════════════════════════════ */
+
+.review-screen {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.review-screen.active { display: flex; }
+
+/* ── Top Bar ─────────────────────────── */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--white-08);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.top-brand {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-right: 16px;
+}
+
+.top-brand .brand-one { font-size: 16px; }
+.top-brand .brand-39 { font-size: 14px; }
+
+.top-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 18px;
+  color: var(--white);
+  flex: 1;
+}
+
+.top-url {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--white-04);
+  border: 1px solid var(--white-08);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.top-url:hover { border-color: var(--gold-border); }
+
+.top-url-text {
+  font-size: 11px;
+  font-family: var(--sans);
+  color: var(--white-40);
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-url-icon {
+  color: var(--gold);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.top-url.copied .top-url-icon { transform: scale(1.2); }
+.top-url.copied .top-url-text { color: var(--gold); }
+
+.top-code {
+  font-size: 11px;
+  color: var(--white-20);
+  padding: 6px 10px;
+  background: var(--white-04);
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+
+.btn-new {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--white-08);
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--white-40);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-new:hover { border-color: var(--gold-border); color: var(--gold); }
+
+/* ── Split View ──────────────────────── */
+.split-view {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.preview-pane {
+  flex: 0 0 60%;
+  background: #000;
+  position: relative;
+}
+
+.preview-pane iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ── Chat Pane ───────────────────────── */
+.chat-pane {
+  flex: 0 0 40%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--white-08);
+}
+
+.chat-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--white-08);
+}
+
+.chat-header .t-label { margin-bottom: 4px; }
+
+.chat-header-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 20px;
+  color: var(--white);
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--white-08) transparent;
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--white-08); border-radius: 2px; }
+
+.msg {
+  max-width: 90%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  animation: msgIn 0.35s var(--ease-out);
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg.user {
+  align-self: flex-end;
+  background: var(--gold-dim);
+  color: var(--white);
+  border-bottom-right-radius: 4px;
+}
+
+.msg.system {
+  align-self: flex-start;
+  background: var(--white-04);
+  color: var(--white-60);
+  border-bottom-left-radius: 4px;
+}
+
+.msg.system.success { border-left: 2px solid var(--gold); }
+.msg.system.error { border-left: 2px solid var(--error); color: var(--error); }
+
+.msg-changes {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--white-08);
+  font-size: 11px;
+  color: var(--white-40);
+}
+
+/* ── Chat Input ──────────────────────── */
+.chat-input-wrap {
+  padding: 16px 24px;
+  border-top: 1px solid var(--white-08);
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--surface-raised);
+  border: 1px solid var(--white-08);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--white);
+  outline: none;
+  resize: none;
+  min-height: 44px;
+  max-height: 120px;
+  transition: border-color 0.3s;
+}
+
+.chat-input:focus { border-color: var(--gold-border); }
+.chat-input::placeholder { color: var(--white-20); }
+
+.btn-send {
+  width: 44px;
+  height: 44px;
+  background: var(--gold);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--midnight);
+  transition: all 0.3s;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+.btn-send:hover { box-shadow: 0 2px 12px rgba(198, 172, 116, 0.3); }
+.btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-send svg { width: 16px; height: 16px; }
+
+/* ── Welcome Message ─────────────────── */
+.chat-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  padding: 40px;
+  gap: 12px;
+}
+
+.chat-welcome-icon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--white-08);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+/* ── Error Banner ────────────────────── */
+.error-banner {
+  display: none;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgba(212, 99, 75, 0.1);
+  border: 1px solid rgba(212, 99, 75, 0.25);
+  border-radius: 8px;
+  color: var(--error);
+  font-size: 13px;
+}
+
+.error-banner.visible { display: block; animation: screenIn 0.3s var(--ease); }
+
+/* ── Responsive ──────────────────────── */
+@media (max-width: 900px) {
+  .split-view { flex-direction: column; }
+  .preview-pane { flex: 0 0 50%; }
+  .chat-pane { flex: 0 0 50%; }
+  .top-url { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══════════ STATE 1: UPLOAD ═══════════ -->
+  <div id="uploadScreen" class="screen active">
+    <div class="brand">
+      <div class="brand-mark"><span class="brand-one">One</span><span class="brand-39">39</span></div>
+      <span class="brand-sub">Profile Generator</span>
+    </div>
+
+    <div class="upload-screen">
+      <div class="form-header">
+        <p class="t-label">New Candidate Profile</p>
+        <h1 class="t-heading">Upload documents to<br>generate a live profile</h1>
+        <p class="t-body" style="margin-top: 12px;">Upload 4&ndash;20 files: resumes, ministry assessments, photos, and more.</p>
+      </div>
+
+      <div id="errorBanner" class="error-banner"></div>
+
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M20 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2"/></svg>
+        </div>
+        <p class="drop-title">Drop files here or click to browse</p>
+        <p class="drop-sub">PDF, Word, TXT, JPG, PNG</p>
+        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+      </div>
+
+      <ul class="file-list" id="fileList"></ul>
+
+      <div class="form-fields">
+        <div class="field">
+          <label>Church Name</label>
+          <input type="text" id="churchName" placeholder="e.g. Relevant Church">
+        </div>
+        <div class="field">
+          <label>Role Title</label>
+          <input type="text" id="roleTitle" placeholder="e.g. Worship Pastor">
+        </div>
+        <div class="field full">
+          <label>Access Code</label>
+          <div class="access-row">
+            <input type="text" id="accessCode" placeholder="Password for the profile link">
+            <button class="btn-random" id="btnRandom" type="button">Generate</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="btnGenerate" disabled>
+        Generate Profile
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════ STATE 2: PROCESSING ═══════════ -->
+  <div id="processingScreen" class="screen processing-screen">
+    <div class="loader-wrap">
+      <div class="orbit orbit-1"><div class="orbit-dot"></div></div>
+      <div class="orbit orbit-2"></div>
+      <div class="orbit orbit-3"></div>
+      <div class="loader-center"><div class="loader-pulse"></div></div>
+    </div>
+
+    <p class="progress-title" id="progressTitle">Preparing&hellip;</p>
+
+    <div class="steps" id="progressSteps">
+      <div class="step" data-step="extract"><span class="step-dot"></span>Extracting text from documents</div>
+      <div class="step" data-step="classify"><span class="step-dot"></span>Classifying uploaded images</div>
+      <div class="step" data-step="generate"><span class="step-dot"></span>Generating profile with AI</div>
+      <div class="step" data-step="deploy"><span class="step-dot"></span>Deploying to the web</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STATE 3: REVIEW ═══════════ -->
+  <div id="reviewScreen" class="screen review-screen">
+    <div class="top-bar">
+      <div class="top-brand"><span class="brand-one">One</span><span class="brand-39">39</span></div>
+      <span class="top-name" id="topName"></span>
+      <div class="top-url" id="topUrl" title="Click to copy">
+        <span class="top-url-text" id="topUrlText"></span>
+        <span class="top-url-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></span>
+      </div>
+      <span class="top-code" id="topCode"></span>
+      <button class="btn-new" id="btnNew">New Profile</button>
+    </div>
+
+    <div class="split-view">
+      <div class="preview-pane">
+        <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+      <div class="chat-pane">
+        <div class="chat-header">
+          <p class="t-label">Revisions</p>
+          <p class="chat-header-title">Refine the profile</p>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-welcome" id="chatWelcome">
+            <div class="chat-welcome-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <p class="t-body">Make changes with natural language.</p>
+            <p class="t-caption">&ldquo;Change the role title to Senior Pastor&rdquo;</p>
+            <p class="t-caption">&ldquo;Rewrite the bio to emphasize his worship background&rdquo;</p>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <textarea class="chat-input" id="chatInput" placeholder="Describe a change&hellip;" rows="1"></textarea>
+          <button class="btn-send" id="btnSend" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ══════════════════════════════════════
+  // CONFIG
+  // ══════════════════════════════════════
+  var API_BASE = ''; // Set to Railway URL, e.g. 'https://one39-generator-production.up.railway.app'
+
+  // ══════════════════════════════════════
+  // STATE
+  // ══════════════════════════════════════
+  var files = [];
+  var currentProfile = null; // { id, url, name, code, html }
+
+  // ══════════════════════════════════════
+  // ELEMENTS
+  // ══════════════════════════════════════
+  var $ = function(id) { return document.getElementById(id); };
+
+  var uploadScreen = $('uploadScreen');
+  var processingScreen = $('processingScreen');
+  var reviewScreen = $('reviewScreen');
+  var dropZone = $('dropZone');
+  var fileInput = $('fileInput');
+  var fileList = $('fileList');
+  var churchName = $('churchName');
+  var roleTitle = $('roleTitle');
+  var accessCode = $('accessCode');
+  var btnRandom = $('btnRandom');
+  var btnGenerate = $('btnGenerate');
+  var errorBanner = $('errorBanner');
+  var progressTitle = $('progressTitle');
+  var topName = $('topName');
+  var topUrlText = $('topUrlText');
+  var topUrl = $('topUrl');
+  var topCode = $('topCode');
+  var btnNew = $('btnNew');
+  var previewFrame = $('previewFrame');
+  var chatMessages = $('chatMessages');
+  var chatWelcome = $('chatWelcome');
+  var chatInput = $('chatInput');
+  var btnSend = $('btnSend');
+
+  // ══════════════════════════════════════
+  // SCREEN TRANSITIONS
+  // ══════════════════════════════════════
+  function showScreen(screen) {
+    [uploadScreen, processingScreen, reviewScreen].forEach(function(s) {
+      s.classList.remove('active');
+    });
+    screen.classList.add('active');
+  }
+
+  // ══════════════════════════════════════
+  // FILE MANAGEMENT
+  // ══════════════════════════════════════
+  function getFileIcon(name) {
+    var ext = name.split('.').pop().toLowerCase();
+    if (ext === 'pdf') return { cls: 'pdf', label: 'PDF' };
+    if (ext === 'doc' || ext === 'docx') return { cls: 'doc', label: 'DOC' };
+    if (['jpg','jpeg','png'].indexOf(ext) !== -1) return { cls: 'img', label: 'IMG' };
+    return { cls: 'txt', label: 'TXT' };
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function renderFiles() {
+    fileList.innerHTML = '';
+    files.forEach(function(file, i) {
+      var icon = getFileIcon(file.name);
+      var li = document.createElement('li');
+      li.className = 'file-item';
+      li.style.animationDelay = (i * 0.04) + 's';
+      li.innerHTML =
+        '<div class="file-icon ' + icon.cls + '">' + icon.label + '</div>' +
+        '<span class="file-name">' + escHtml(file.name) + '</span>' +
+        '<span class="file-size">' + formatSize(file.size) + '</span>' +
+        '<button class="file-remove" data-idx="' + i + '" title="Remove">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>' +
+        '</button>';
+      fileList.appendChild(li);
+    });
+
+    btnGenerate.disabled = files.length === 0;
+    if (files.length > 0) {
+      btnGenerate.innerHTML = 'Generate Profile <span class="file-count">' + files.length + '</span>';
+    } else {
+      btnGenerate.textContent = 'Generate Profile';
+    }
+  }
+
+  function addFiles(newFiles) {
+    for (var i = 0; i < newFiles.length; i++) {
+      if (files.length >= 20) break;
+      var dup = files.some(function(f) { return f.name === newFiles[i].name && f.size === newFiles[i].size; });
+      if (!dup) files.push(newFiles[i]);
+    }
+    renderFiles();
+  }
+
+  fileInput.addEventListener('change', function() {
+    addFiles(this.files);
+    this.value = '';
+  });
+
+  fileList.addEventListener('click', function(e) {
+    var btn = e.target.closest('.file-remove');
+    if (btn) {
+      files.splice(parseInt(btn.dataset.idx), 1);
+      renderFiles();
+    }
+  });
+
+  // Drag and drop
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    dropZone.addEventListener(ev, function(e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    dropZone.addEventListener(ev, function(e) { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+  });
+  dropZone.addEventListener('drop', function(e) { addFiles(e.dataTransfer.files); });
+
+  // ══════════════════════════════════════
+  // ACCESS CODE GENERATOR
+  // ══════════════════════════════════════
+  btnRandom.addEventListener('click', function() {
+    var words = ['grace','faith','hope','light','peace','truth','glory','mercy','joy','praise',
+                 'spirit','crown','cross','heart','stone','river','cedar','olive','harbor','summit'];
+    var w = words[Math.floor(Math.random() * words.length)];
+    var n = Math.floor(Math.random() * 9000) + 1000;
+    accessCode.value = w + n;
+  });
+
+  // ══════════════════════════════════════
+  // ERROR DISPLAY
+  // ══════════════════════════════════════
+  function showError(msg) {
+    errorBanner.textContent = msg;
+    errorBanner.classList.add('visible');
+    setTimeout(function() { errorBanner.classList.remove('visible'); }, 8000);
+  }
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // ══════════════════════════════════════
+  // PROGRESS STEPS
+  // ══════════════════════════════════════
+  var stepOrder = ['extract', 'classify', 'generate', 'deploy'];
+  var stepLabels = {
+    extract: 'Extracting documents\u2026',
+    classify: 'Classifying images\u2026',
+    generate: 'Generating profile with AI\u2026',
+    deploy: 'Deploying to the web\u2026'
+  };
+
+  function setStep(stepName) {
+    var reached = false;
+    var allSteps = document.querySelectorAll('#progressSteps .step');
+    allSteps.forEach(function(el) {
+      var s = el.dataset.step;
+      if (s === stepName) {
+        el.className = 'step active';
+        reached = true;
+        progressTitle.textContent = stepLabels[s];
+      } else if (!reached) {
+        el.className = 'step done';
+      } else {
+        el.className = 'step';
+      }
+    });
+  }
+
+  // ══════════════════════════════════════
+  // GENERATE PROFILE
+  // ══════════════════════════════════════
+  btnGenerate.addEventListener('click', function() {
+    if (files.length === 0) return;
+    if (!accessCode.value.trim()) {
+      showError('Please set an access code for the profile.');
+      accessCode.focus();
+      return;
+    }
+
+    // Reset progress
+    document.querySelectorAll('#progressSteps .step').forEach(function(el) { el.className = 'step'; });
+    progressTitle.textContent = 'Preparing\u2026';
+    showScreen(processingScreen);
+
+    // Simulate step progression (actual server doesn't stream progress)
+    var stepTimers = [];
+    stepTimers.push(setTimeout(function() { setStep('extract'); }, 500));
+    stepTimers.push(setTimeout(function() { setStep('classify'); }, 6000));
+    stepTimers.push(setTimeout(function() { setStep('generate'); }, 12000));
+
+    // Build form data
+    var fd = new FormData();
+    fd.append('church_name', churchName.value.trim());
+    fd.append('role_title', roleTitle.value.trim());
+    fd.append('access_code', accessCode.value.trim());
+    files.forEach(function(f) { fd.append('files', f); });
+
+    fetch(API_BASE + '/api/generate-profile', { method: 'POST', body: fd })
+      .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+      .then(function(result) {
+        stepTimers.forEach(clearTimeout);
+
+        if (!result.ok) {
+          showScreen(uploadScreen);
+          showError(result.data.error || 'Generation failed.');
+          return;
+        }
+
+        setStep('deploy');
+        setTimeout(function() {
+          currentProfile = {
+            id: result.data.profile_id,
+            url: result.data.profile_url,
+            name: result.data.candidate_name,
+            code: accessCode.value.trim(),
+            html: result.data.html_preview
+          };
+          enterReview();
+        }, 1500);
+      })
+      .catch(function(err) {
+        stepTimers.forEach(clearTimeout);
+        showScreen(uploadScreen);
+        showError('Network error: ' + err.message);
+      });
+  });
+
+  // ══════════════════════════════════════
+  // REVIEW STATE
+  // ══════════════════════════════════════
+  function enterReview() {
+    topName.textContent = currentProfile.name;
+    topUrlText.textContent = currentProfile.url || 'Deploying\u2026';
+    topCode.textContent = currentProfile.code;
+
+    // Load preview
+    previewFrame.srcdoc = currentProfile.html;
+
+    // Reset chat
+    chatMessages.innerHTML = '';
+    chatMessages.appendChild(chatWelcome);
+    chatWelcome.style.display = 'flex';
+
+    showScreen(reviewScreen);
+  }
+
+  // Copy URL
+  topUrl.addEventListener('click', function() {
+    if (!currentProfile || !currentProfile.url) return;
+    navigator.clipboard.writeText(currentProfile.url).then(function() {
+      topUrl.classList.add('copied');
+      topUrlText.textContent = 'Copied!';
+      setTimeout(function() {
+        topUrl.classList.remove('copied');
+        topUrlText.textContent = currentProfile.url;
+      }, 2000);
+    });
+  });
+
+  // New profile
+  btnNew.addEventListener('click', function() {
+    files = [];
+    renderFiles();
+    churchName.value = '';
+    roleTitle.value = '';
+    accessCode.value = '';
+    currentProfile = null;
+    showScreen(uploadScreen);
+  });
+
+  // ══════════════════════════════════════
+  // REVISION CHAT
+  // ══════════════════════════════════════
+  function addMessage(text, type, extra) {
+    chatWelcome.style.display = 'none';
+    var div = document.createElement('div');
+    div.className = 'msg ' + type;
+    var content = escHtml(text);
+    if (extra) content += '<div class="msg-changes">' + escHtml(extra) + '</div>';
+    div.innerHTML = content;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function sendRevision() {
+    var text = chatInput.value.trim();
+    if (!text || !currentProfile) return;
+
+    addMessage(text, 'user');
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    btnSend.disabled = true;
+
+    addMessage('Applying changes\u2026', 'system');
+
+    fetch(API_BASE + '/api/revise-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profile_id: currentProfile.id, instruction: text })
+    })
+      .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+      .then(function(result) {
+        // Remove "Applying changes" message
+        var msgs = chatMessages.querySelectorAll('.msg.system');
+        var last = msgs[msgs.length - 1];
+        if (last && last.textContent === 'Applying changes\u2026') last.remove();
+
+        if (!result.ok) {
+          addMessage(result.data.error || 'Revision failed.', 'system error');
+          btnSend.disabled = false;
+          return;
+        }
+
+        var changes = result.data.changes ? Object.keys(result.data.changes).join(', ') : '';
+        addMessage('Done. Profile updated and redeployed.', 'system success', changes ? 'Changed: ' + changes : '');
+
+        // Update preview
+        if (result.data.html_preview) {
+          currentProfile.html = result.data.html_preview;
+          previewFrame.srcdoc = result.data.html_preview;
+        }
+        if (result.data.profile_url) {
+          currentProfile.url = result.data.profile_url;
+          topUrlText.textContent = result.data.profile_url;
+        }
+
+        btnSend.disabled = false;
+      })
+      .catch(function(err) {
+        var msgs = chatMessages.querySelectorAll('.msg.system');
+        var last = msgs[msgs.length - 1];
+        if (last && last.textContent === 'Applying changes\u2026') last.remove();
+        addMessage('Network error: ' + err.message, 'system error');
+        btnSend.disabled = false;
+      });
+  }
+
+  chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    btnSend.disabled = !this.value.trim();
+  });
+
+  chatInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendRevision();
+    }
+  });
+
+  btnSend.addEventListener('click', sendRevision);
+
+})();
+</script>
+</body>
+</html>
