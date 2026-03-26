@@ -901,6 +901,42 @@ body::after {
 .btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-send svg { width: 16px; height: 16px; }
 
+.btn-image {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid var(--white-08);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white-40);
+  transition: all 0.3s;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+.btn-image:hover { border-color: var(--gold-border); color: var(--gold); background: var(--gold-glow); }
+
+.image-category-select {
+  background: var(--surface-raised);
+  border: 1px solid var(--white-08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--white-60);
+  outline: none;
+  align-self: flex-end;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='rgba(245,240,235,0.4)' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
+.image-category-select option { background: var(--surface); color: var(--white); }
+
 /* ── Welcome Message ─────────────────── */
 .chat-welcome {
   display: flex;
@@ -1003,6 +1039,7 @@ body::after {
           <label>Primary Voice</label>
           <select id="voice1">
             <option value="">Auto-detect from docs</option>
+            <option value="none">No 5 Voices results</option>
             <option value="Pioneer">Pioneer</option>
             <option value="Connector">Connector</option>
             <option value="Creative">Creative</option>
@@ -1014,6 +1051,7 @@ body::after {
           <label>Secondary Voice</label>
           <select id="voice2">
             <option value="">Auto-detect from docs</option>
+            <option value="none">No 5 Voices results</option>
             <option value="Pioneer">Pioneer</option>
             <option value="Connector">Connector</option>
             <option value="Creative">Creative</option>
@@ -1095,6 +1133,16 @@ body::after {
           </div>
         </div>
         <div class="chat-input-wrap">
+          <input type="file" id="chatImageInput" accept=".jpg,.jpeg,.png" style="display:none">
+          <button class="btn-image" id="btnImage" title="Replace a photo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </button>
+          <select id="imageCategory" class="image-category-select" style="display:none">
+            <option value="">Replace which photo?</option>
+            <option value="headshot">Headshot</option>
+            <option value="ministry">Ministry / Story</option>
+            <option value="spouse">Spouse / Family</option>
+          </select>
           <textarea class="chat-input" id="chatInput" placeholder="Describe a change&hellip;" rows="1"></textarea>
           <button class="btn-send" id="btnSend" disabled>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
@@ -1316,8 +1364,13 @@ body::after {
     fd.append('access_code', accessCode.value.trim());
     var v1 = document.getElementById('voice1').value;
     var v2 = document.getElementById('voice2').value;
-    if (v1) fd.append('voice1', v1);
-    if (v2) fd.append('voice2', v2);
+    if (v1 === 'none') {
+      fd.append('voice1', '');
+      fd.append('voice2', '');
+    } else {
+      if (v1) fd.append('voice1', v1);
+      if (v2 && v2 !== 'none') fd.append('voice2', v2);
+    }
     fd.append('include_spouse', document.getElementById('includeSpouse').checked ? '1' : '0');
     files.forEach(function(f) { fd.append('files', f); });
 
@@ -1475,6 +1528,75 @@ body::after {
   });
 
   btnSend.addEventListener('click', sendRevision);
+
+  // ══════════════════════════════════════
+  // IMAGE REPLACEMENT
+  // ══════════════════════════════════════
+  var btnImage = $('btnImage');
+  var imageCategory = $('imageCategory');
+  var chatImageInput = $('chatImageInput');
+
+  btnImage.addEventListener('click', function() {
+    // Toggle category dropdown
+    var showing = imageCategory.style.display !== 'none';
+    imageCategory.style.display = showing ? 'none' : 'inline-block';
+    if (!showing) imageCategory.value = '';
+  });
+
+  imageCategory.addEventListener('change', function() {
+    if (!this.value) return;
+    chatImageInput.click();
+  });
+
+  chatImageInput.addEventListener('change', function() {
+    var file = this.files[0];
+    var category = imageCategory.value;
+    if (!file || !category || !currentProfile) return;
+
+    // Reset UI
+    imageCategory.style.display = 'none';
+    chatImageInput.value = '';
+
+    var label = category.charAt(0).toUpperCase() + category.slice(1);
+    addMessage('Replacing ' + label + ' photo\u2026', 'user');
+    addMessage('Uploading and redeploying\u2026', 'system');
+
+    var fd = new FormData();
+    fd.append('profile_id', currentProfile.id);
+    fd.append('category', category);
+    fd.append('image', file);
+
+    fetch(API_BASE + '/api/update-profile-image', { method: 'POST', body: fd })
+      .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+      .then(function(result) {
+        // Remove "Uploading" message
+        var msgs = chatMessages.querySelectorAll('.msg.system');
+        var last = msgs[msgs.length - 1];
+        if (last && last.textContent === 'Uploading and redeploying\u2026') last.remove();
+
+        if (!result.ok) {
+          addMessage(result.data.error || 'Image update failed.', 'system error');
+          return;
+        }
+
+        addMessage(label + ' photo updated and redeployed.', 'system success');
+
+        if (result.data.html_preview) {
+          currentProfile.html = result.data.html_preview;
+          previewFrame.srcdoc = result.data.html_preview;
+        }
+        if (result.data.profile_url) {
+          currentProfile.url = result.data.profile_url;
+          topUrlText.textContent = result.data.profile_url;
+        }
+      })
+      .catch(function(err) {
+        var msgs = chatMessages.querySelectorAll('.msg.system');
+        var last = msgs[msgs.length - 1];
+        if (last && last.textContent === 'Uploading and redeploying\u2026') last.remove();
+        addMessage('Network error: ' + err.message, 'system error');
+      });
+  });
 
 })();
 </script>
