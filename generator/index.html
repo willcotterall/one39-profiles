@@ -890,6 +890,7 @@ body::after {
 
 .msg.system.success { border-left: 2px solid var(--gold); }
 .msg.system.error { border-left: 2px solid var(--error); color: var(--error); }
+.msg.system.suggestion { border-left: 2px solid #D4A84B; color: var(--white-60); background: rgba(198, 172, 116, 0.06); }
 
 .msg-changes {
   margin-top: 8px;
@@ -1451,7 +1452,8 @@ body::after {
             url: result.data.profile_url,
             name: result.data.candidate_name,
             code: accessCode.value.trim(),
-            html: result.data.html_preview
+            html: result.data.html_preview,
+            suggestions: result.data.suggestions || []
           };
           enterReview();
         }, 1500);
@@ -1478,7 +1480,17 @@ body::after {
     // Reset chat
     chatMessages.innerHTML = '';
     chatMessages.appendChild(chatWelcome);
-    chatWelcome.style.display = 'flex';
+
+    // Show suggestions if any, otherwise show welcome
+    var suggestions = currentProfile.suggestions || [];
+    if (suggestions.length > 0) {
+      chatWelcome.style.display = 'none';
+      suggestions.forEach(function(s) {
+        addMessage(s.message, 'system suggestion');
+      });
+    } else {
+      chatWelcome.style.display = 'flex';
+    }
 
     showScreen(reviewScreen);
   }
